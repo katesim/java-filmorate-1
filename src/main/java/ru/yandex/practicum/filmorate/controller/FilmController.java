@@ -9,11 +9,12 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 @RestController
 @Slf4j
 public class FilmController {
-    private HashMap<Integer, Film> films = new HashMap<>();
+    private Map<Integer, Film> films = new HashMap<>();
     private Integer filmID = 0;
 
     private void validationFilm(Film film) throws ValidationException {
