@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.model.User;
 
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
