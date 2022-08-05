@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -35,4 +36,10 @@ public class Film {
 
     @JsonIgnore
     Set<Integer> likes = new HashSet<>();
+
+    @NotNull
+    private String mpaRating; // переделать на enum
+
+    @NotNull
+    private String genre; // переделать на enum
 }
