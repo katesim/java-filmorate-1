@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import ru.yandex.practicum.filmorate.dao.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.dao.DbFilmStorage;
 
 
 import static java.util.Objects.requireNonNull;
@@ -21,11 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class FilmControllerTest {
     private final MockMvc mockMvc;
-    private final InMemoryFilmStorage filmStorage;
+    private final DbFilmStorage filmStorage;
 
     @Autowired
     public FilmControllerTest(
-            MockMvc mockMvc, InMemoryFilmStorage filmStorage) {
+            MockMvc mockMvc, DbFilmStorage filmStorage) {
         this.mockMvc = mockMvc;
         this.filmStorage = filmStorage;
     }

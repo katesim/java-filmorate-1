@@ -1,47 +1,55 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserService {
 
+    UserStorage userStorage;
+
     @Autowired
-    InMemoryUserStorage userStorage;
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     //Создаем юзера
     public User createUser(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.createUser(user);
+        User userCreated = userStorage.createUser(user);
+        log.debug("Create user {}", userCreated);
+        return userCreated;
     }
 
     //Обновляем юзера
     public User updateUser(User user) {
-        final User updatedUser = userStorage.getUserForID(user.getId());
-        if (updatedUser == null) {
-            throw new NotFoundException("User with ID = " + user.getId() + " not found.");
-        } else {
-            return userStorage.updateUser(user);
-        }
+        User updatedUser = getUserByID(user.getId());
+        if (user.getBirthday() == null) user.setBirthday(updatedUser.getBirthday());
+        if (user.getLogin() == null) user.setLogin(updatedUser.getLogin());
+        if (user.getEmail() == null) user.setEmail(updatedUser.getEmail());
+        userStorage.updateUser(user);
+        log.debug("Update user {}", user);
+        return getUserByID(user.getId());
     }
 
     //Получаем список всех юзеров
-    public Set<User> getAllUsers() {
+    public List<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
     //Добавляем друга юзеру
     public void addFriend(int userID, int friendID) {
-        User user = userStorage.getUserForID(userID);
-        User friend = userStorage.getUserForID(friendID);
+        User user = getUserByID(userID);
+        User friend = getUserByID(friendID);
         if (user == null) {
             throw new NotFoundException("User with ID = " + userID + " not found.");
         }
@@ -53,8 +61,8 @@ public class UserService {
 
     //Удаляем друга у юзера
     public void deleteFriend(int userID, int friendID) {
-        User user = userStorage.getUserForID(userID);
-        User friend = userStorage.getUserForID(friendID);
+        User user = getUserByID(userID);
+        User friend = getUserByID(friendID);
         if (user == null) {
             throw new NotFoundException("User with ID = " + userID + " not found.");
         }
@@ -68,46 +76,28 @@ public class UserService {
     }
 
     //Получаем юзера по ID
-    public User getUserForID(int userID) {
-        final User user = userStorage.getUserForID(userID);
-        if (user == null) {
+    public User getUserByID(int userID) {
+        Optional<User> user = userStorage.getUserByID(userID);
+        if (user.isEmpty()) {
             throw new NotFoundException("User with ID = " + userID + " not found.");
         }
-        return userStorage.getUserForID(userID);
-    }
-    //Получаем список друзей по ID юзера
-    public Set<User> getFriendsListForUserID(int userID) {
-        final User user = userStorage.getUserForID(userID);
-        if (user == null) {
-            throw new NotFoundException("User with ID = " + userID + " not found.");
-        }
-       return getFriendsIdForUserID(userID).stream()
-                .map(userStorage::getUserForID)
-                .collect(Collectors.toSet());
+        log.debug("GET User {}",user);
+        return user.get();
     }
 
-    //Получаем ID друзей по ID юзера
-    public Set<Integer> getFriendsIdForUserID(int userID) {
-        final User user = userStorage.getUserForID(userID);
-        if (user == null) {
-            throw new NotFoundException("User with ID = " + userID + " not found.");
-        }
-        return userStorage.getFriendsIdForUserID(user);
+    //Получаем список друзей по ID юзера
+    public List<User> getFriendsListForUserID(int userID) {
+        getUserByID(userID);
+        List<User> friends = userStorage.getFriendsByUserID(userID);
+        log.debug("GET User friends {}", friends.size());
+        return friends;
     }
 
     //Получаем общих друзей по ID юзеров
-    public Set<User> getCommonsFriendsForUsersID(int userID, int otherID) {
-        final User user = userStorage.getUserForID(userID);
-        final User otherUser = userStorage.getUserForID(otherID);
-        if (user == null) {
-            throw new NotFoundException("User with ID = " + userID + " not found.");
-        }
-        if (otherUser == null) {
-            throw new NotFoundException("User with ID = " + otherID + " not found.");
-        }
-        return getFriendsIdForUserID(userID).stream()
-                .filter(getFriendsIdForUserID(otherID)::contains)
-                .map(userStorage::getUserForID)
-                .collect(Collectors.toSet());
+    public List<User> getCommonsFriendsForUsersID(int userID, int otherID) {
+        List<User> friends = getFriendsListForUserID(userID);
+        friends.retainAll(getFriendsListForUserID(otherID));
+        log.debug("GET Common friends {}", friends.size());
+        return friends;
     }
 }

@@ -34,12 +34,8 @@ public class Film {
     @Min(1)
     private long duration;
 
-    @JsonIgnore
-    Set<Integer> likes = new HashSet<>();
-
     @NotNull
-    private String mpaRating; // переделать на enum
+    private Mpa mpa;
 
-    @NotNull
-    private String genre; // переделать на enum
+    private List<Genre> genres;
 }

@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.DbUserStorage;
 
 
 
@@ -22,11 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserControllerTest {
     private final MockMvc mockMvc;
-    private final InMemoryUserStorage userStorage;
+    private final DbUserStorage userStorage;
 
     @Autowired
     public UserControllerTest(
-            MockMvc mockMvc, InMemoryUserStorage userStorage) {
+            MockMvc mockMvc, DbUserStorage userStorage) {
         this.mockMvc = mockMvc;
         this.userStorage = userStorage;
     }
