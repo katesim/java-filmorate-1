@@ -22,17 +22,16 @@ public class MpaService {
     }
 
     public Mpa getMpaById(int id) {
-        Optional<Mpa> mpa = mpaStorage.loadMpaById(id);
+        Optional<Mpa> mpa = mpaStorage.getMpaById(id);
         if (mpa.isPresent()) {
-            log.debug("Load {}", mpa.get());
             return mpa.get();
         } else {
-            throw new NotFoundException("MPA #" + id + " not found");
+            throw new NotFoundException("MPA not found" + id);
         }
     }
 
     public List<Mpa> getAllMpa() {
-        List<Mpa> mpa = mpaStorage.loadAllMpa();
+        List<Mpa> mpa = mpaStorage.getAllMpa();
         log.debug("Load {} MPA", mpa.size());
         return mpa;
     }

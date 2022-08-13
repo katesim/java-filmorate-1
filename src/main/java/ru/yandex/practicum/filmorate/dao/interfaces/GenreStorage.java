@@ -12,6 +12,8 @@ public interface GenreStorage {
 
     void saveGenresInFilm(int id, List<Genre> genres);
 
+    List<Genre> findByIds(List<Integer> ids);
+
     void deleteGenresInFilm(int id);
 
     List<Genre> getAllGenres();

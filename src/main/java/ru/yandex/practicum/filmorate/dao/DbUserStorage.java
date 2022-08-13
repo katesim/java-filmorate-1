@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.model.User;
@@ -13,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class DbUserStorage implements UserStorage {
@@ -28,7 +28,7 @@ public class DbUserStorage implements UserStorage {
     //Создаем юзера
     @Override
     public User createUser(User user) {
-        String sqlQuery = "INSERT INTO USERS (NAME, LOGIN , EMAIL, BIRTHDAY) VALUES (?, ?, ?, ?);";
+        String sqlQuery = "INSERT INTO USERS (LOGIN, NAME , EMAIL, BIRTHDAY) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement statement = connection.prepareStatement(sqlQuery, new String[]{"id"});
@@ -60,16 +60,16 @@ public class DbUserStorage implements UserStorage {
 
     //Добавляем друга юзеру
     @Override
-    public void addFriend(User user, User friend) {
+    public void addFriend(int userID, int friendID) {
         String sqlQuery = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID) VALUES (?, ?);";
-        jdbcTemplate.update(sqlQuery, user.getId(), friend.getId());
+        jdbcTemplate.update(sqlQuery, userID, friendID);
     }
 
     //Удаляем друга у юзера
     @Override
-    public void deleteFriend(User user, User friend) {
-        String sqlQuery = "SELECT COUNT(USER_ID) FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?;";
-        jdbcTemplate.queryForObject(sqlQuery, Integer.class, user.getId(), friend.getId());
+    public void deleteFriend(int userID, int friendID) {
+        String sqlQuery = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?;";
+        jdbcTemplate.update(sqlQuery, userID, friendID);
     }
 
     //Получаем юзера по ID
@@ -81,7 +81,21 @@ public class DbUserStorage implements UserStorage {
 
     //Получаем друзей юзера по ID юзера
     @Override
-    public List<User> getFriendsByUserID(int userID) {
+    public List<Optional<User>> getFriendsByUserID(int userID) {
+        String sqlQuery = "SELECT FRIEND_ID " +
+                "FROM FRIENDS " +
+                "WHERE USER_ID=?";
+        List<Integer> friendIds = jdbcTemplate.queryForList(sqlQuery, Integer.class, userID);
+        List<Optional<User>> list = new ArrayList<>();
+        for (Integer friendId : friendIds) {
+            Optional<User> userById = getUserByID(friendId);
+            list.add(userById);
+        }
+        return list;
+    }
+
+    @Override
+    public List<User> getCommonFriendByUserID(int userID) {
         String sqlQuery = "SELECT ID, LOGIN, NAME, EMAIL, BIRTHDAY " +
                 "FROM (" +
                 "    SELECT u.ID, u.LOGIN, u.NAME, u.EMAIL, u.BIRTHDAY" +
@@ -94,9 +108,10 @@ public class DbUserStorage implements UserStorage {
                 "    FROM FRIENDS f" +
                 "    JOIN USERS u" +
                 "        ON f.USER_ID = u.ID" +
-                "    WHERE f.friend_id = ?" +
+                "    WHERE f.FRIEND_ID = ?" +
                 ") AS FRIENDS " +
                 "ORDER BY ID ASC;";
         return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(User.class), userID, userID);
     }
 }
+

@@ -34,11 +34,11 @@ public class FilmService {
 
     //Создаем фильм
     public Film createFilm(Film film) {
-        Film film1 = filmStorage.createFilm(film);
-        if (film.getGenres() != null && film.getGenres().size() > 0) {
-            genreService.saveGenresInFilm(film1.getId(), film.getGenres());
-        }
+        filmStorage.createFilm(film);
         Film createdFilm = getFilmByID(film.getId());
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            genreService.saveGenresInFilm(createdFilm.getId(),film.getGenres());
+        }
         log.debug("POST Create film {}", createdFilm);
         return createdFilm;
     }

@@ -29,5 +29,20 @@ public class FilmMapper implements RowMapper<Film> {
         film.setMpa(mpa);
         film.setGenres(genreService.loadGenresByFilmId(rs.getInt("ID")));
         return film;
+//
+//        Mpa mpa = Mpa.builder().
+//                id(rs.getInt("MPA_ID"))
+//                .name(rs.getString("MPA"))
+//                .build();
+//        return Film.builder()
+//                .id(rs.getInt("ID"))
+//                .name(rs.getString("NAME"))
+//                .description(rs.getString("DESCRIPTION"))
+//                .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
+//                .duration(rs.getLong("DURATION"))
+//                .mpa(mpa)
+//                .genres(genreService.loadGenresByFilmId(rs.getInt("id")))
+//                .build();
     }
-}
+    }
+

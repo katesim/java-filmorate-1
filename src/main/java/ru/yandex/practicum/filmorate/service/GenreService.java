@@ -24,10 +24,10 @@ public class GenreService {
     public Genre getGenreById(int id) {
         Optional<Genre> genre = genreStorage.loadGenreById(id);
         if (genre.isPresent()) {
-            log.debug("Load {}", genre.get());
+            log.debug("GET genre {}", genre.get());
             return genre.get();
         } else {
-            throw new NotFoundException("Genre #" + id + " not found");
+            throw new NotFoundException("Genre id #" + id + " not found");
         }
     }
 
@@ -52,5 +52,9 @@ public class GenreService {
         List<Genre> genre = genreStorage.getAllGenres();
         log.debug("Load {} genres", genre.size());
         return genre;
+    }
+
+    public List<Genre> findByIds(List<Integer> ids) {
+        return genreStorage.findByIds(ids);
     }
 }

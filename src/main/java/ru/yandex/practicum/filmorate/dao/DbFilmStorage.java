@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -9,12 +11,15 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class DbFilmStorage implements FilmStorage {
@@ -30,7 +35,7 @@ public class DbFilmStorage implements FilmStorage {
 
 
     @Override
-    public Film createFilm(Film film) {
+    public Optional<Film> createFilm(Film film) {
         String sqlQuery = "INSERT INTO films (NAME, DESCRIPTION, RELEASE_DATE,  DURATION, MPA_ID) " +
                 "VALUES (?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -40,11 +45,41 @@ public class DbFilmStorage implements FilmStorage {
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
             ps.setLong(4, film.getDuration());
-            ps.setLong(5, film.getMpa().getId());
+            ps.setInt(5, film.getMpa().getId());
             return ps;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-        return film;
+        if (film.getId() > 1) {
+            saveGenresInFilm(film,keyHolder);
+        }
+        return Optional.of(film);
+    }
+
+    @Override
+    public Optional<Film> saveGenresInFilm(Film filmData,KeyHolder keyHolder) {
+        Optional<Film> optionalFilm = getFilmByID(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        optionalFilm.ifPresent(film -> {
+            if (!film.getGenres().isEmpty()) {
+                genreService.deleteGenresInFilm(filmData.getId());
+            }
+        });
+        String sqlQuery = "INSERT INTO FILMS_GENRES (GENRE_ID, FILM_ID)" +
+                "VALUES (?, ?)";
+        filmData.getGenres().forEach(genre -> {
+            try {
+                jdbcTemplate.update(sqlQuery, genre.getId(), filmData.getId());
+            } catch (DuplicateKeyException e) {
+                e.getMessage();
+            }
+        });
+        if (filmData.getGenres() != null && filmData.getGenres().size() != 0) {
+            optionalFilm.ifPresent(film -> {
+                film.setGenres(genreService.findByIds(filmData.getGenres().stream().mapToInt(Genre::getId).boxed().collect(Collectors.toList())));
+            });
+        } else {
+            optionalFilm.ifPresent(film -> film.setGenres(new ArrayList<>()));
+        }
+        return optionalFilm;
     }
 
     @Override
@@ -75,7 +110,7 @@ public class DbFilmStorage implements FilmStorage {
                         "m.NAME mpa, " +
                         "FROM FILMS f " +
                         "JOIN MPA m" +
-                        "    ON m.MPA_ID = f.MPA_ID;";
+                        "    ON m.ID = f.MPA_ID;";
         return jdbcTemplate.query(sqlQuery, new FilmMapper(genreService));
     }
 
@@ -92,7 +127,7 @@ public class DbFilmStorage implements FilmStorage {
                         "m.NAME mpa, " +
                         "FROM FILMS f " +
                         "JOIN MPA m" +
-                        "    ON m.MPA_ID = f.MPA_ID " +
+                        "    ON m.ID = f.MPA_ID " +
                         "WHERE f.ID = ?;";
         return jdbcTemplate.query(sqlQuery, new FilmMapper(genreService), filmID).stream().findAny();
     }
@@ -131,7 +166,7 @@ public class DbFilmStorage implements FilmStorage {
                         "m.NAME mpa, " +
                         "FROM FILMS f " +
                         "JOIN MPA m" +
-                        "    ON m.MPA_ID = f.MPA_ID " +
+                        "    ON m.ID = f.MPA_ID " +
                         "LEFT JOIN (SELECT FILM_ID, " +
                         "      COUNT(USER_ID) rating " +
                         "      FROM RATING_FILMS " +

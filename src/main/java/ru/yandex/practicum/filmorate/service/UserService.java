@@ -48,31 +48,13 @@ public class UserService {
 
     //Добавляем друга юзеру
     public void addFriend(int userID, int friendID) {
-        User user = getUserByID(userID);
-        User friend = getUserByID(friendID);
-        if (user == null) {
-            throw new NotFoundException("User with ID = " + userID + " not found.");
-        }
-        if (friend == null) {
-            throw new NotFoundException("Friend with ID = " + friendID + " not found.");
-        }
-        userStorage.addFriend(user, friend);
+        if(friendID < 0) throw new NotFoundException("Friend not found");
+        userStorage.addFriend(userID, friendID);
     }
 
     //Удаляем друга у юзера
     public void deleteFriend(int userID, int friendID) {
-        User user = getUserByID(userID);
-        User friend = getUserByID(friendID);
-        if (user == null) {
-            throw new NotFoundException("User with ID = " + userID + " not found.");
-        }
-        if (friend == null) {
-            throw new NotFoundException("Friend with ID = " + friendID + " not found.");
-        }
-        if (!userStorage.getAllUsers().contains(user) || !userStorage.getAllUsers().contains(friend)) {
-            throw new NotFoundException("User or friend with ID not found.");
-        }
-        userStorage.deleteFriend(user, friend);
+        userStorage.deleteFriend(userID, friendID);
     }
 
     //Получаем юзера по ID
@@ -86,17 +68,16 @@ public class UserService {
     }
 
     //Получаем список друзей по ID юзера
-    public List<User> getFriendsListForUserID(int userID) {
-        getUserByID(userID);
-        List<User> friends = userStorage.getFriendsByUserID(userID);
+    public List<Optional<User>> getFriendsListForUserID(int userID) {
+        List<Optional<User>> friends = userStorage.getFriendsByUserID(userID);
         log.debug("GET User friends {}", friends.size());
         return friends;
     }
 
     //Получаем общих друзей по ID юзеров
     public List<User> getCommonsFriendsForUsersID(int userID, int otherID) {
-        List<User> friends = getFriendsListForUserID(userID);
-        friends.retainAll(getFriendsListForUserID(otherID));
+        List<User> friends = userStorage.getCommonFriendByUserID(userID);
+        friends.retainAll(userStorage.getCommonFriendByUserID(otherID));
         log.debug("GET Common friends {}", friends.size());
         return friends;
     }

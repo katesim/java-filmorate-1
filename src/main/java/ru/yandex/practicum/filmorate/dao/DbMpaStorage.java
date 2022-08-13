@@ -21,14 +21,14 @@ public class DbMpaStorage implements MpaStorage {
     }
 
     @Override
-    public Optional<Mpa> loadMpaById(int id) {
-        String sqlQuery = "SELECT MPA_ID, NAME FROM MPA WHERE MPA_ID = ?;";
-        return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(Mpa.class), id).stream().findAny();
+    public Optional<Mpa> getMpaById(int id) {
+        String sqlQuery = "SELECT ID, NAME FROM MPA WHERE ID = ?;";
+        return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(Mpa.class), id).stream().findFirst();
     }
 
     @Override
-    public List<Mpa> loadAllMpa() {
-        String sqlQuery = "SELECT MPA_ID, NAME FROM MPA;";
+    public List<Mpa> getAllMpa() {
+        String sqlQuery = "SELECT ID, NAME FROM MPA;";
         return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(Mpa.class));
     }
 }
