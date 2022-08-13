@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
 class FilmControllerTest {
     private final MockMvc mockMvc;
@@ -35,10 +37,13 @@ class FilmControllerTest {
         mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isOk());
     }
@@ -49,9 +54,12 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
                                 "  \"name\": \"\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -66,10 +74,13 @@ class FilmControllerTest {
         MvcResult response = mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"kuku\",\n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
                                 "  \"description\": \"\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -84,10 +95,13 @@ class FilmControllerTest {
         MvcResult response = mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"kuku\",\n" +
-                                "  \"description\": \"kto tam\",\n" +
+                                "  \"name\": \"New film\",\n" +
                                 "  \"releaseDate\": \"\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -102,10 +116,13 @@ class FilmControllerTest {
                 mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"kuku\",\n" +
-                                "  \"description\": \"kto tam\",\n" +
-                                "  \"releaseDate\": \"3033-07-04\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"3088-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isBadRequest());
     }
@@ -115,10 +132,13 @@ class FilmControllerTest {
         mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"kuku\",\n" +
-                                "  \"description\": \"kto tam\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": \n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": ,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isInternalServerError());
     }
@@ -128,10 +148,13 @@ class FilmControllerTest {
         mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"kuku\",\n" +
-                                "  \"description\": \"kto tam\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": -1\n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": -1,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isBadRequest());
     }
@@ -141,10 +164,13 @@ class FilmControllerTest {
         mockMvc.perform((post("/films"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"name\": \"New film\",\n" +
+                                "  \"releaseDate\": \"1999-04-30\",\n" +
+                                "  \"description\": \"New film about friends\",\n" +
+                                "  \"duration\": 120,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 3},\n" +
+                                "  \"genres\": [{ \"id\": 1}]\n" +
                                 "}"))
                 .andExpect(status().isOk());
 
@@ -155,30 +181,10 @@ class FilmControllerTest {
                                 "  \"name\": \"Film Updated\",\n" +
                                 "  \"releaseDate\": \"1989-04-17\",\n" +
                                 "  \"description\": \"New film update decription\",\n" +
-                                "  \"duration\": 190\n" +
+                                "  \"duration\": 190,\n" +
+                                "  \"rate\": 4,\n" +
+                                "  \"mpa\": { \"id\": 5}\n" +
                                 "}"))
                 .andExpect(status().isOk());
     }
-    @Test
-    void getFilms() throws Exception {
-        mockMvc.perform((post("/films"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1967-03-25\",\n" +
-                                "  \"duration\": 100\n" +
-                                "}"))
-                .andExpect(status().isOk());
-
-        MvcResult mvcResult = mockMvc.perform(get("/films"))
-                .andExpect(status().isOk())
-                .andReturn();
-        String result = mvcResult.getResponse().getContentAsString();
-        String film = "[{\"id\":1,\"name\":\"Film Updated\",\"description\":\"New film update decription\",\"releaseDate\":\"1989-04-17\",\"duration\":190}," +
-                "{\"id\":3,\"name\":\"nisi eiusmod\",\"description\":\"adipisicing\",\"releaseDate\":\"1967-03-25\",\"duration\":100}," +
-                "{\"id\":2,\"name\":\"nisi eiusmod\",\"description\":\"adipisicing\",\"releaseDate\":\"1967-03-25\",\"duration\":100}]";
-        assertEquals(film, result);
-        assertNotNull(result);
-}
     }
