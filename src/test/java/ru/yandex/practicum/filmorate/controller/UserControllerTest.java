@@ -2,12 +2,13 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import ru.yandex.practicum.filmorate.dao.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.DbUserStorage;
 
 
 
@@ -19,14 +20,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 @AutoConfigureMockMvc
 class UserControllerTest {
     private final MockMvc mockMvc;
-    private final InMemoryUserStorage userStorage;
+    private final DbUserStorage userStorage;
 
     @Autowired
     public UserControllerTest(
-            MockMvc mockMvc, InMemoryUserStorage userStorage) {
+            MockMvc mockMvc, DbUserStorage userStorage) {
         this.mockMvc = mockMvc;
         this.userStorage = userStorage;
     }
@@ -160,28 +162,4 @@ class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
-
-    @Test
-    void getUsers() throws Exception {
-        mockMvc.perform((post("/users"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"dolore\",\n" +
-                                "  \"name\": \"Nick Name\",\n" +
-                                "  \"email\": \"mail@mail.ru\",\n" +
-                                "  \"birthday\": \"1946-08-20\"\n" +
-                                "}"))
-                .andExpect(status().isOk());
-
-        MvcResult mvcResult = mockMvc.perform(get("/users"))
-                .andExpect(status().isOk())
-                .andReturn();
-        String result = mvcResult.getResponse().getContentAsString();
-        String user = "[{\"id\":1,\"email\":\"mail@yandex.ru\",\"login\":\"doloreUpdate\",\"name\":\"est adipisicing\",\"birthday\":\"1976-09-20\"}," +
-                "{\"id\":2,\"email\":\"mail@mail.ru\",\"login\":\"dolore\",\"name\":\"dolore\",\"birthday\":\"1946-08-20\"}," +
-                "{\"id\":4,\"email\":\"mail@mail.ru\",\"login\":\"dolore\",\"name\":\"Nick Name\",\"birthday\":\"1946-08-20\"}," +
-                "{\"id\":3,\"email\":\"mail@mail.ru\",\"login\":\"dolore\",\"name\":\"Nick Name\",\"birthday\":\"1946-08-20\"}]";
-        assertEquals(user, result);
-        assertNotNull(result);
-    }
 }
